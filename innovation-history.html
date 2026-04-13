@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Innovation History — FranceTech</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        .hero-video-wrap {
+            position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
+        }
+        .hero-video-wrap video {
+            width: 100%; height: 100%; object-fit: cover;
+            animation: heroZoom 35s ease-in-out infinite alternate;
+            filter: brightness(1.7) saturate(1.1);
+        }
+        @keyframes heroZoom {
+            0% { transform: scale(1.0); }
+            100% { transform: scale(1.1); }
+        }
+        .hero-grade {
+            position: fixed; inset: 0; z-index: -1;
+            background: radial-gradient(circle at center, transparent 0%, rgba(3, 0, 15, 0.4) 100%),
+                        linear-gradient(to bottom, rgba(3, 0, 15, 0.5) 0%, rgba(3, 0, 15, 0.9) 100%);
+        }
+
+        /* Timeline / Mind Tree styles */
+        .history-container {
+            max-width: 1200px; margin: 0 auto; padding: 8rem 2rem 10rem; position: relative;
+        }
+        .timeline-trunk {
+            position: absolute; left: 50%; top: 25rem; bottom: 5rem;
+            width: 2px; background: linear-gradient(to bottom, #a78bfa 0%, #f472b6 50%, #60a5fa 100%);
+            transform: translateX(-50%); opacity: 0.3;
+        }
+        
+        .century-node {
+            position: relative; margin: 6rem 0; display: flex; flex-direction: column; align-items: center; z-index: 2;
+        }
+        .century-label {
+            background: #a78bfa; color: #fff; padding: 0.5rem 1.5rem; border-radius: 50px;
+            font-family: 'Space Mono', monospace; font-weight: 700; font-size: 0.9rem;
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.4); margin-bottom: 2rem;
+        }
+
+        .innovation-item {
+            position: relative; width: 45%; margin: 2rem 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .innovation-item.left { align-self: flex-start; text-align: right; }
+        .innovation-item.right { align-self: flex-end; text-align: left; }
+        
+        /* The branch line connecting to trunk */
+        .innovation-item::after {
+            content: ''; position: absolute; top: 1.5rem; width: 11.2%; height: 1px;
+            background: rgba(255,255,255,0.2);
+        }
+        .innovation-item.left::after { right: -11.2%; }
+        .innovation-item.right::after { left: -11.2%; }
+
+        .innovation-card {
+            background: var(--glass-bg); backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            padding: 1.5rem; transition: all 0.4s ease;
+        }
+        .innovation-card:hover {
+            border-color: #a78bfa; transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(167, 139, 250, 0.2);
+        }
+        .innovation-year {
+            font-family: 'Space Mono', monospace; color: #a78bfa; font-size: 0.8rem;
+            font-weight: 700; margin-bottom: 0.5rem; display: block;
+        }
+        .innovation-title {
+            font-size: 1.25rem; font-weight: 800; margin-bottom: 0.8rem; color: #fff;
+        }
+        .innovation-desc {
+            font-size: 0.9rem; line-height: 1.6; opacity: 0.7; color: #fff;
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .timeline-trunk { left: 2rem; }
+            .innovation-item { width: 85%; align-self: flex-end !important; text-align: left !important; }
+            .innovation-item::after { left: -10% !important; width: 10% !important; }
+            .century-node { align-items: flex-start; padding-left: 0.5rem; }
+            .century-label { margin-left: 0; }
+        }
+    </style>
+</head>
+<body class="dark-mode">
+
+    <div class="hero-video-wrap">
+        <video autoplay loop muted playsinline>
+            <source src="14642837_1280_720_60fps.mp4" type="video/mp4">
+        </video>
+    </div>
+    <div class="hero-grade"></div>
+    <div id="pill-nav-root"></div>
+
+    <div class="history-container">
+        
+        <header class="page-header observer-item" style="text-align: center; margin-bottom: 4rem;">
+            <h1 class="text-gradient" data-history-i18n="historyTitle" style="font-size: clamp(2.5rem, 6vw, 4.5rem); margin-bottom: 1rem;">400 Years of Innovation</h1>
+            <p style="max-width: 800px; margin: 0 auto; font-size: 1.15rem; opacity: 0.88;" data-history-i18n="historySubtitle"></p>
+        </header>
+
+        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem;" class="observer-item">
+            <div class="hero-badge" style="margin-bottom: 0; position: relative; z-index: 10;">
+                <span class="dot" style="background: #a78bfa; box-shadow: 0 0 10px #a78bfa;"></span>
+                <span data-history-i18n="historyTitle">400 Years of Innovation</span>
+            </div>
+        </div>
+
+        <div class="timeline-trunk" style="top: 25rem;"></div>
+
+        <!-- 1600s -->
+        <div class="century-node observer-item">
+            <div class="century-label" data-history-i18n="1600s">1600s</div>
+            <div class="innovation-item left observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">1642</span>
+                    <h3 class="innovation-title" data-history-i18n="inv1642">Pascaline Mechanical Calculator</h3>
+                    <p class="innovation-desc" data-history-i18n="inv1642Desc"></p>
+                    <a href="pascaline.html" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1700s -->
+        <div class="century-node observer-item">
+            <div class="century-label" data-history-i18n="1700s">1700s</div>
+            <div class="innovation-item right observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">1783</span>
+                    <h3 class="innovation-title" data-history-i18n="inv1783a">Hot-Air Balloon</h3>
+                    <p class="innovation-desc" data-history-i18n="inv1783aDesc"></p>
+                    <a href="hot-air-balloon.html" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="innovation-item left observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">1783</span>
+                    <h3 class="innovation-title" data-history-i18n="inv1783b">Modern Parachute</h3>
+                    <p class="innovation-desc" data-history-i18n="inv1783bDesc"></p>
+                    <a href="parachute.html" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="innovation-item right observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">1790s</span>
+                    <h3 class="innovation-title" data-history-i18n="inv1790">Metric System</h3>
+                    <p class="innovation-desc" data-history-i18n="inv1790Desc"></p>
+                    <a href="metric-system.html" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1800s -->
+        <div class="century-node observer-item">
+            <div class="century-label" data-history-i18n="1800s">1800s</div>
+            <div class="innovation-item left observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">1816</span>
+                    <h3 class="innovation-title" data-history-i18n="inv1816">Stethoscope</h3>
+                    <p class="innovation-desc" data-history-i18n="inv1816Desc"></p>
+                    <a href="stethoscope.html" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="innovation-item right observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">1839</span>
+                    <h3 class="innovation-title" data-history-i18n="inv1839">Photovoltaic effect</h3>
+                    <p class="innovation-desc" data-history-i18n="inv1839Desc"></p>
+                    <a href="https://whysofrance.com/famous-french-inventions-list/" target="_blank" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="innovation-item left observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">1851</span>
+                    <h3 class="innovation-title" data-history-i18n="inv1851">Foucault pendulum</h3>
+                    <p class="innovation-desc" data-history-i18n="inv1851Desc"></p>
+                    <a href="https://languageatlas.com/blog/brilliant-french-inventions/" target="_blank" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="innovation-item right observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">1890</span>
+                    <h3 class="innovation-title" data-history-i18n="inv1890a">Early powered airplane work</h3>
+                    <p class="innovation-desc" data-history-i18n="inv1890aDesc"></p>
+                    <a href="https://whysofrance.com/famous-french-inventions-list/" target="_blank" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="innovation-item left observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">1890s</span>
+                    <h3 class="innovation-title" data-history-i18n="inv1890b">Cinema Technology</h3>
+                    <p class="innovation-desc" data-history-i18n="inv1890bDesc"></p>
+                    <a href="https://goswifties.com/2024/05/11/frances-legacy-of-innovation-celebrating-pioneering-technologies-and-inventions/" target="_blank" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="innovation-item right observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">1896</span>
+                    <h3 class="innovation-title" data-history-i18n="inv1896">Radioactivity</h3>
+                    <p class="innovation-desc" data-history-i18n="inv1896Desc"></p>
+                    <a href="radioactivity.html" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1900s -->
+        <div class="century-node observer-item">
+            <div class="century-label" data-history-i18n="1900s">1900s</div>
+            <div class="innovation-item left observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">1904</span>
+                    <h3 class="innovation-title" data-history-i18n="inv1904">Aileron</h3>
+                    <p class="innovation-desc" data-history-i18n="inv1904Desc"></p>
+                    <a href="https://whysofrance.com/famous-french-inventions-list/" target="_blank" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="innovation-item right observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">1916/17</span>
+                    <h3 class="innovation-title" data-history-i18n="inv1916">Sonar</h3>
+                    <p class="innovation-desc" data-history-i18n="inv1916Desc"></p>
+                    <a href="https://en.wikipedia.org/wiki/List_of_French_inventions_and_discoveries" target="_blank" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="innovation-item left observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">1931</span>
+                    <h3 class="innovation-title" data-history-i18n="inv1931">Darrieus wind turbine</h3>
+                    <p class="innovation-desc" data-history-i18n="inv1931Desc"></p>
+                    <a href="https://whysofrance.com/famous-french-inventions-list/" target="_blank" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="innovation-item right observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">1943</span>
+                    <h3 class="innovation-title" data-history-i18n="inv1943">Aqua-Lung / scuba</h3>
+                    <p class="innovation-desc" data-history-i18n="inv1943Desc"></p>
+                    <a href="https://alanrogers.com/blog/france/ingenious-french-inventions" target="_blank" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modern Era -->
+        <div class="century-node observer-item">
+            <div class="century-label" data-history-i18n="ModernEra">Modern Era</div>
+            <div class="innovation-item left observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">1997</span>
+                    <h3 class="innovation-title" data-history-i18n="inv1997">Camera phone concept</h3>
+                    <p class="innovation-desc" data-history-i18n="inv1997Desc"></p>
+                    <a href="camera-phone.html" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="innovation-item right observer-item">
+                <div class="innovation-card">
+                    <span class="innovation-year">2000s–2020s</span>
+                    <h3 class="innovation-title" data-history-i18n="inv2000s">AI, quantum, space tech</h3>
+                    <p class="innovation-desc" data-history-i18n="inv2000sDesc"></p>
+                    <a href="https://www.belfercenter.org/sites/default/files/2025-06/CountryReports_June%202025.pdf" target="_blank" class="link-btn" style="font-size: 0.7rem; margin-top: 1rem;">Read Full Story <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="glass-effect observer-item" style="margin-top: 0;">
+        <p data-i18n="footerText">© 2026 France Technology Hub. Designed with elegance.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="pill-nav.js"></script>
+    <script src="scroll-reveal.js"></script>
+    <script>
+        // Trigger initial i18n update for this specific page
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.updateLanguage) window.updateLanguage();
+        });
+    </script>
+</body>
+</html>

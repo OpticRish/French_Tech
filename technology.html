@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>French Technology — Airbus & TGV</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        .hero-video-wrap {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .hero-video-wrap video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            animation: heroZoom 28s ease-in-out infinite alternate;
+            filter: brightness(1.3);
+        }
+
+        @keyframes heroZoom {
+            0% { transform: scale(1.05) translateY(0px); }
+            100% { transform: scale(1.15) translateY(-15px); }
+        }
+
+        body { background-color: transparent !important; }
+        .hero-grade {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: linear-gradient(to bottom,
+                    rgba(255, 255, 255, 0.1) 0%,
+                    rgba(255, 255, 255, 0.05) 40%,
+                    rgba(255, 255, 255, 0.2) 75%,
+                    rgba(255, 255, 255, 0.4) 100%);
+        }
+        
+        /* Light mode overrides to ensure the black text requested */
+        body:not(.dark-mode) {
+            color: #000 !important;
+        }
+        body:not(.dark-mode) p, 
+        body:not(.dark-mode) .stat-label, 
+        body:not(.dark-mode) .timeline-event, 
+        body:not(.dark-mode) .card-content p, 
+        body:not(.dark-mode) .back-btn, 
+        body:not(.dark-mode) .hud-label {
+            color: #000 !important;
+            opacity: 1 !important;
+        }
+
+        /* Dark mode overrides for the video background */
+        body.dark-mode .hero-grade {
+            background: linear-gradient(to bottom,
+                    rgba(3, 0, 18, 0.6) 0%,
+                    rgba(3, 0, 18, 0.4) 40%,
+                    rgba(6, 0, 16, 0.7) 75%,
+                    #060010 100%);
+        }
+    </style>
+    <style>
+        /* ── Tab switcher ── */
+        .tech-tabs {
+            display: flex;
+            gap: 0;
+            max-width: 480px;
+            margin: 0 auto 3rem;
+            border-radius: 50px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            padding: 0.35rem;
+        }
+        .tech-tab {
+            flex: 1;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            background: none;
+            color: var(--text-color);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .tech-tab.active {
+            background: var(--gradient-text);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        }
+        .tech-tab:not(.active):hover { background: var(--btn-bg); }
+
+        /* ── Panels ── */
+        .tech-panel { display: none; animation: panelIn 0.45s ease; }
+        .tech-panel.active { display: block; }
+        @keyframes panelIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Section divider ── */
+        .section-divider {
+            width: 100%; max-width: 1160px; margin: 3rem auto;
+            padding: 0 2rem;
+            display: flex; align-items: center; gap: 1rem;
+        }
+        .section-divider .line {
+            flex: 1; height: 1px; background: var(--glass-border);
+        }
+        .section-divider .label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem; letter-spacing: 0.18em;
+            text-transform: uppercase; color: var(--primary-color);
+            white-space: nowrap;
+        }
+
+        /* ── TGV route ribbon ── */
+        .route-ribbon {
+            width: 100%; max-width: 1160px;
+            margin: 0 auto 3rem; padding: 0 2rem;
+        }
+        .route-track {
+            display: flex; align-items: center;
+            overflow-x: auto; gap: 0;
+            padding-bottom: 0.5rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) transparent;
+        }
+        .route-stop {
+            display: flex; flex-direction: column; align-items: center;
+            min-width: 100px; flex-shrink: 0;
+        }
+        .route-dot {
+            width: 14px; height: 14px; border-radius: 50%;
+            border: 2px solid var(--primary-color);
+            background: var(--bg-color);
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+        .route-stop:hover .route-dot { background: var(--primary-color); }
+        .route-city {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem; letter-spacing: 0.08em;
+            margin-top: 0.5rem; text-align: center;
+            color: var(--text-color); opacity: 0.75;
+        }
+        .route-time {
+            font-size: 0.6rem; opacity: 0.5;
+            font-family: 'Space Mono', monospace;
+            margin-top: 0.2rem;
+        }
+        .route-line {
+            flex: 1; height: 2px; min-width: 40px;
+            background: linear-gradient(90deg, var(--primary-color), #f472b6);
+            position: relative; align-self: center;
+            /* little train running along */
+        }
+        .route-line::after {
+            content: '▶';
+            position: absolute; top: -7px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.55rem;
+            color: var(--primary-color);
+            animation: trainRun 3s linear infinite;
+        }
+        @keyframes trainRun {
+            0%  { left: 10%; }
+            100%{ left: 90%; }
+        }
+
+        /* ── Split hero (image left, text right) ── */
+        .tech-hero-split {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 2.5rem;
+            align-items: center;
+            max-width: 1160px;
+            margin: 0 auto 3rem;
+            padding: 0 2rem;
+        }
+        @media (max-width: 768px) { .tech-hero-split { grid-template-columns: 1fr; } }
+
+        .tech-hero-img {
+            border-radius: 24px; overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+            position: relative;
+        }
+        .tech-hero-img img {
+            width: 100%; display: block;
+            transition: transform 0.9s ease;
+        }
+        .tech-hero-img:hover img { transform: scale(1.04); }
+        .tech-hero-img .caption {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 1.5rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+            font-family: 'Space Mono', monospace; font-size: 0.62rem;
+            letter-spacing: 0.13em; text-transform: uppercase;
+            color: rgba(255,255,255,0.7); pointer-events: none;
+        }
+
+        .tech-hero-text h2 {
+            font-size: clamp(2rem, 3.5vw, 2.8rem);
+            line-height: 1.15; margin-bottom: 1.2rem;
+        }
+        .tech-hero-text p {
+            line-height: 1.75; opacity: 0.84; margin-bottom: 1rem;
+        }
+
+        /* ── TGV video embed ── */
+        .tgv-video-wrap {
+            width: 100%; max-width: 1160px;
+            margin: 0 auto 3rem; padding: 0 2rem;
+        }
+        .tgv-video-inner {
+            border-radius: 24px; overflow: hidden;
+            position: relative; aspect-ratio: 16/7;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            background: #060010;
+        }
+        .tgv-video-inner video {
+            width: 100%; height: 100%; object-fit: cover;
+            filter: brightness(1.3);
+        }
+        .tgv-video-inner .caption {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 1.5rem 2rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.65), transparent);
+            font-family: 'Space Mono', monospace; font-size: 0.62rem;
+            letter-spacing: 0.13em; text-transform: uppercase;
+            color: rgba(255,255,255,0.7); pointer-events: none;
+        }
+
+        /* ── TGV record card ── */
+        .record-card {
+            border-radius: 24px; padding: 2.5rem 2rem;
+            background: var(--glass-bg); backdrop-filter: blur(14px);
+            border: 1px solid var(--glass-border);
+            text-align: center; position: relative; overflow: hidden;
+        }
+        .record-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: var(--gradient-text);
+        }
+        .record-num {
+            font-family: 'Space Mono', monospace;
+            font-size: clamp(3rem, 7vw, 5rem); font-weight: 700;
+            background: var(--gradient-text);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1; margin-bottom: 0.5rem;
+        }
+        .record-unit { font-family: 'Space Mono', monospace; font-size: 0.7rem; opacity: 0.6; letter-spacing: 0.1em; }
+        .record-desc { margin-top: 1rem; opacity: 0.8; line-height: 1.5; }
+
+        /* ── Airbus timeline (same as airbus.html) passed through ── */
+        .timeline { width: 100%; max-width: 1160px; margin: 0 auto 3rem; padding: 0 2rem; }
+        .timeline-title {
+            font-family: 'Space Mono', monospace; font-size: 0.68rem;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--primary-color); margin-bottom: 1.4rem;
+            padding-left: 1rem; border-left: 2px solid var(--primary-color);
+        }
+        .timeline-track {
+            display: flex; gap: 1px; overflow-x: auto;
+            padding-bottom: 0.5rem; scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) transparent;
+        }
+        .timeline-item {
+            flex: 0 0 185px; padding: 1.4rem 1.1rem;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg); backdrop-filter: blur(10px);
+            position: relative; transition: all 0.3s ease; cursor: default;
+        }
+        .timeline-item:first-child { border-radius: 14px 0 0 14px; }
+        .timeline-item:last-child  { border-radius: 0 14px 14px 0; }
+        .timeline-item:not(:first-child) { border-left: none; }
+        .timeline-item:hover { background: var(--btn-bg); transform: translateY(-4px); z-index:1; border-color: var(--primary-color); border-left: 1px solid var(--primary-color) !important; }
+        .timeline-year {
+            font-family: 'Space Mono', monospace; font-size: 1.35rem; font-weight: 700;
+            background: var(--gradient-text); -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent; margin-bottom: 0.5rem;
+        }
+        .timeline-event { font-size: 0.8rem; line-height: 1.4; opacity: 0.85; }
+    </style>
+</head>
+<body class="">
+
+    <div class="hero-video-wrap">
+        <video autoplay loop muted playsinline>
+            <source src="14642837_1280_720_60fps.mp4" type="video/mp4">
+        </video>
+    </div>
+    <div class="hero-grade"></div>
+    <div id="pill-nav-root"></div>
+
+    <!-- Sub-nav -->
+    <div class="sub-nav observer-item">
+        <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> <span data-i18n="backHome">Back to Home</span></a>
+        <span class="hud-label">TECH-001 // AIRBUS &amp; TGV DIVISION</span>
+    </div>
+
+    <!-- Page header -->
+    <header class="page-header observer-item" style="margin-top:1rem; display: flex; flex-direction: column; align-items: center;">
+        <div class="hero-badge" style="margin-bottom:1rem;">
+            <span class="dot"></span>
+            <span>Engineering — Toulouse · Paris · Bordeaux</span>
+        </div>
+        <h1 class="text-gradient" data-i18n="techPageTitle" style="font-size:clamp(2.4rem,6vw,4.2rem); margin-bottom:1.5rem; text-align: center;">French Technology</h1>
+        
+        <!-- Tab switcher (The Pill Box) -->
+        <div class="tech-tabs" style="margin-bottom: 2rem;">
+            <button class="tech-tab active" onclick="switchTab('airbus',this)">
+                <i class="fa-solid fa-plane"></i> Airbus
+            </button>
+            <button class="tech-tab" onclick="switchTab('tgv',this)">
+                <i class="fa-solid fa-train-tram"></i> TGV
+            </button>
+        </div>
+
+        <p style="max-width:680px; margin:0 auto; font-size:1.1rem; opacity:1; text-align: center;" data-i18n="techPageDesc" data-scroll-reveal>
+            Two icons. One nation. Airbus rewrites aviation while the TGV redefines land speed — both made in France, both leading the world.
+        </p>
+    </header>
+
+    <!-- ═══════════════ AIRBUS PANEL ═══════════════ -->
+    <div class="tech-panel active" id="panel-airbus">
+
+        <!-- Stats -->
+        <div class="stats-row observer-item delay-1">
+            <div class="stat-block">
+                <div class="stat-number" data-counter="13000" data-suffix="+">0</div>
+                <div class="stat-label" data-i18n="statAirService">Aircraft in Service</div>
+            </div>
+            <div class="stat-block">
+                <div class="stat-number" data-counter="180" data-suffix="+">0</div>
+                <div class="stat-label" data-i18n="statAirOperators">Airlines & Operators</div>
+            </div>
+            <div class="stat-block">
+                <div class="stat-number" data-counter="134000" data-suffix="+">0</div>
+                <div class="stat-label" data-i18n="statAirEmployees">Employees Worldwide</div>
+            </div>
+            <div class="stat-block">
+                <div class="stat-number" data-counter="2035" data-suffix="">0</div>
+                <div class="stat-label" data-i18n="statZeroE">ZEROe Target Year</div>
+            </div>
+        </div>
+
+        <!-- Hero split -->
+        <div class="tech-hero-split observer-item">
+            <div class="tech-hero-img">
+                <video id="airbus-video" autoplay loop muted playsinline style="width:100%; display:block; aspect-ratio: 1920/810; object-fit: cover;">
+                    <source src="13517919-hd_1920_810_24fps.mp4" type="video/mp4">
+                </video>
+                <div class="caption">A350 XWB · Photographed at FL380 · Video Capture</div>
+            </div>
+            <div class="tech-hero-text">
+                <div class="hud-label" style="margin-bottom:1rem;padding-left:0.8rem;border-left:2px solid var(--primary-color);">// A LEGACY OF INNOVATION</div>
+                <h2 class="text-gradient" data-i18n="airbusInnovationTitle">From Consortium<br>to World Leader</h2>
+                <p data-i18n="airbusInnovationDesc1">Founded in 1970 as a bold European consortium, Airbus set out to challenge the dominance of American manufacturers. The A300 — the world's first twin-engine widebody — changed aviation economics forever.</p>
+                <p data-i18n="airbusInnovationDesc2">Today Airbus delivers over 700 aircraft per year across the A220, A320, A330, A350 and A380 families, serving 180+ airlines on every continent.</p>
+                <a href="airbus.html" class="link-btn" data-i18n="airbusFullStory">Full Airbus Story <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline observer-item">
+            <div class="timeline-title" data-i18n="airbusMilestonesTitle">// Airbus Milestones</div>
+            <div class="timeline-track">
+                <div class="timeline-item"><div class="timeline-year">1970</div><div class="timeline-event" data-i18n="airbusM1">Airbus Industrie founded as European consortium</div></div>
+                <div class="timeline-item"><div class="timeline-year">1972</div><div class="timeline-event" data-i18n="airbusM2">A300 first flight — world's first twin widebody</div></div>
+                <div class="timeline-item"><div class="timeline-year">1988</div><div class="timeline-event" data-i18n="airbusM3">A320 enters service with digital fly-by-wire</div></div>
+                <div class="timeline-item"><div class="timeline-year">2005</div><div class="timeline-event" data-i18n="airbusM4">A380 superjumbo first flight in Toulouse</div></div>
+                <div class="timeline-item"><div class="timeline-year">2013</div><div class="timeline-event" data-i18n="airbusM5">A350 XWB first flight — composite fuselage</div></div>
+                <div class="timeline-item"><div class="timeline-year">2020</div><div class="timeline-event" data-i18n="airbusM6">ZEROe concept unveiled — hydrogen propulsion</div></div>
+                <div class="timeline-item"><div class="timeline-year">2035</div><div class="timeline-event" data-i18n="airbusM7">Target: first zero-emission commercial aircraft</div></div>
+            </div>
+        </div>
+
+        <!-- ZEROe split -->
+        <div class="section-divider observer-item">
+            <div class="line"></div><div class="label" data-i18n="zeroEInitiativeLabel">// ZEROe INITIATIVE</div><div class="line"></div>
+        </div>
+
+        <div class="tech-hero-split observer-item" style="direction:rtl;">
+            <div class="tech-hero-img" style="direction:ltr;">
+                <img src="zeroeairbus.jpg" alt="Airbus ZEROe concept">
+                <div class="caption" data-i18n="zeroECaption">ZEROe Concept · Hydrogen Propulsion · Target 2035</div>
+            </div>
+            <div class="tech-hero-text" style="direction:ltr;">
+                <div class="hud-label" style="margin-bottom:1rem;padding-left:0.8rem;border-left:2px solid var(--primary-color);">// HYDROGEN PROPULSION</div>
+                <h2 class="text-gradient" data-i18n="zeroETitle">Flying on<br>Hydrogen</h2>
+                <p data-i18n="zeroEDesc1">The ZEROe family explores three revolutionary concepts — turbofan, turboprop, and blended-wing — all powered by cryogenic liquid hydrogen. Combustion produces only water vapour: zero CO₂, zero carbon.</p>
+                <p data-i18n="zeroEDesc2">With service entry targeted for 2035, this is the most ambitious sustainable aviation programme ever undertaken commercially.</p>
+            </div>
+        </div>
+
+        <!-- Info cards -->
+        <div class="details-grid observer-item delay-1" style="max-width:1160px;margin:0 auto 4rem;padding:0 2rem;">
+            <section class="card glass-effect">
+                <div class="card-content">
+                    <div class="card-meta">HERITAGE // EST. 1970</div>
+                    <h2>European Consortium</h2>
+                    <p>Airbus was born out of political will and engineering ambition. France, Germany, Spain and the UK pooled resources to create an aerospace giant that now commands roughly 50 % of the global commercial aviation market.</p>
+                </div>
+            </section>
+            <section class="card glass-effect">
+                <div class="card-content">
+                    <div class="card-meta">FUTURE // HYDROGEN</div>
+                    <h2>The ZEROe Initiative</h2>
+                    <p>Airbus is developing the world's first hydrogen-powered commercial airliner. Cryogenic liquid hydrogen, stored behind the rear pressure bulkhead, combusts to produce only water vapour — a true zero-emission flight.</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- ═══════════════ TGV PANEL ═══════════════ -->
+    <div class="tech-panel" id="panel-tgv">
+
+        <!-- Stats -->
+        <div class="stats-row observer-item delay-1">
+            <div class="stat-block">
+                <div class="stat-number" data-counter="574" data-suffix=" km/h">0</div>
+                <div class="stat-label" data-i18n="statTGVRecordLabel">World Speed Record</div>
+            </div>
+            <div class="stat-block">
+                <div class="stat-number" data-counter="2800" data-suffix=" km">0</div>
+                <div class="stat-label" data-i18n="statTGVNetwork">Network Length</div>
+            </div>
+            <div class="stat-block">
+                <div class="stat-number" data-counter="1981" data-suffix="">0</div>
+                <div class="stat-label" data-i18n="statTGVStart">Service Entry Year</div>
+            </div>
+            <div class="stat-block">
+                <div class="stat-number" data-counter="3" data-suffix="h10">0</div>
+                <div class="stat-label" data-i18n="statTGVJourney">Paris–Lyon Journey</div>
+            </div>
+        </div>
+
+        <!-- TGV video -->
+        <div class="tgv-video-wrap observer-item">
+            <div class="tgv-video-inner">
+                <video autoplay loop muted playsinline>
+                    <source src="2213-156227801_large.mp4" type="video/mp4">
+                </video>
+                <div class="caption">TGV Duplex · Paris–Lyon LGV · 320 km/h Commercial Speed</div>
+            </div>
+        </div>
+
+        <!-- Hero split -->
+        <div class="tech-hero-split observer-item">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <!-- Record card -->
+                <div class="record-card" style="grid-column:1/-1;">
+                    <div class="record-num">574</div>
+                    <div class="record-unit" data-i18n="tgvRecordUnit">km/h — World Rail Speed Record · April 2007</div>
+                    <div class="record-desc" data-i18n="tgvRecordDesc">Set by TGV V150 on the LGV Est line, this remains the absolute world rail speed record for a wheeled train on conventional track.</div>
+                </div>
+                <div class="card glass-effect" style="padding:1.4rem;border-radius:18px;">
+                    <div class="card-content">
+                        <div class="card-meta">ROUTE // PARIS–LYON</div>
+                        <h2 style="font-size:1.1rem;">2h00 min</h2>
+                        <p style="font-size:0.85rem;">vs 4h30 by car</p>
+                    </div>
+                </div>
+                <div class="card glass-effect" style="padding:1.4rem;border-radius:18px;">
+                    <div class="card-content">
+                        <div class="card-meta">ROUTE // PARIS–MARSEILLE</div>
+                        <h2 style="font-size:1.1rem;">3h05 min</h2>
+                        <p style="font-size:0.85rem;">vs 7h30 by car</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tech-hero-text">
+                <div class="hud-label" style="margin-bottom:1rem;padding-left:0.8rem;border-left:2px solid var(--primary-color);">// THE REVOLUTION ON RAILS</div>
+                <h2 class="text-gradient" data-i18n="tgvRevolutionTitle">Train à Grande<br>Vitesse</h2>
+                <p data-i18n="tgvRevolutionDesc1">Launched in 1981 between Paris and Lyon, the TGV shattered the idea that rail travel was slow. Its dedicated high-speed lines — called LGVs — allow trains to reach 320 km/h in daily commercial service.</p>
+                <p data-i18n="tgvRevolutionDesc2">The network now connects Paris to Bordeaux in 2h04, to Brussels in 1h22, and to London in 2h16 via the Channel Tunnel — making it the backbone of European sustainable mobility.</p>
+            </div>
+        </div>
+
+        <!-- Route ribbon -->
+        <div class="route-ribbon observer-item delay-1">
+            <div class="hud-label" style="margin-bottom:1rem;padding-left:0.8rem;border-left:2px solid var(--primary-color);">// LGV ATLANTIQUE ROUTE</div>
+            <div class="route-track">
+                <div class="route-stop"><div class="route-dot"></div><div class="route-city">Paris<br>Montparnasse</div><div class="route-time">0h00</div></div>
+                <div class="route-line"></div>
+                <div class="route-stop"><div class="route-dot"></div><div class="route-city">Le Mans</div><div class="route-time">0h55</div></div>
+                <div class="route-line"></div>
+                <div class="route-stop"><div class="route-dot"></div><div class="route-city">Tours</div><div class="route-time">1h05</div></div>
+                <div class="route-line"></div>
+                <div class="route-stop"><div class="route-dot"></div><div class="route-city">Poitiers</div><div class="route-time">1h25</div></div>
+                <div class="route-line"></div>
+                <div class="route-stop"><div class="route-dot"></div><div class="route-city">Angoulême</div><div class="route-time">1h42</div></div>
+                <div class="route-line"></div>
+                <div class="route-stop"><div class="route-dot"></div><div class="route-city">Bordeaux<br>Saint-Jean</div><div class="route-time">2h04</div></div>
+            </div>
+        </div>
+
+        <!-- Info cards -->
+        <div class="details-grid observer-item delay-1" style="max-width:1160px;margin:0 auto 4rem;padding:0 2rem;">
+            <section class="card glass-effect">
+                <div class="card-content">
+                    <div class="card-meta">TECH // ALSTOM TGV M</div>
+                    <h2 data-i18n="tgvMTitle">Next-Gen TGV M</h2>
+                    <p data-i18n="tgvMDesc">The TGV M (Avelia Horizon) is the latest generation — 20 % more capacity, 1 GWh energy recovered per year through regenerative braking, and fully modular interiors configurable for different markets.</p>
+                </div>
+            </section>
+            <section class="card glass-effect">
+                <div class="card-content">
+                    <div class="card-meta">SUSTAINABILITY // CO₂</div>
+                    <h2 data-i18n="tgvGreenTitle">Green Transport</h2>
+                    <p data-i18n="tgvGreenDesc">Taking the TGV instead of a short-haul flight on the Paris–Lyon route cuts per-passenger CO₂ by 96 %. France has committed to banning short-haul domestic flights where TGV alternatives exist in under 2.5 hours.</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <footer class="glass-effect observer-item delay-3">
+        <p data-i18n="footerText">© 2026 France Technology Hub. Designed with elegance.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="pill-nav.js"></script>
+    <script src="scroll-reveal.js"></script>
+    <script>
+        function switchTab(name, btn) {
+            // deactivate all
+            document.querySelectorAll('.tech-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tech-panel').forEach(p => p.classList.remove('active'));
+            // activate chosen
+            btn.classList.add('active');
+            document.getElementById('panel-' + name).classList.add('active');
+            // re-trigger counters for newly shown panel
+            document.querySelectorAll('#panel-' + name + ' [data-counter]').forEach(el => {
+                if (!el.dataset.counted) {
+                    el.dataset.counted = 'true';
+                    if (typeof animateCounter === 'function') animateCounter(el);
+                }
+            });
+        }
+
+        // Set video playback speed
+        document.addEventListener('DOMContentLoaded', () => {
+            const abVideo = document.getElementById('airbus-video');
+            if (abVideo) abVideo.playbackRate = 2.0;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rafale — Dassault Aviation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        /* ═══════════════════════════════════════════════
+           FULL-PAGE CAROUSEL (background layer)
+        ═══════════════════════════════════════════════ */
+        .carousel-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -3;
+            overflow: hidden;
+            background: #030008;
+        }
+
+        .carousel-slide {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1.4s ease-in-out;
+            filter: brightness(1.2);
+            /* each slide gets its own slow Ken-Burns pan direction */
+        }
+        .carousel-slide.active { opacity: 1; }
+
+        /* Ken-Burns animations — each slide a different direction */
+        .carousel-slide:nth-child(1) { animation: kb1 12s ease-in-out infinite alternate; }
+        .carousel-slide:nth-child(2) { animation: kb2 14s ease-in-out infinite alternate; }
+        .carousel-slide:nth-child(3) { animation: kb3 12s ease-in-out infinite alternate; }
+        .carousel-slide:nth-child(4) { animation: kb4 14s ease-in-out infinite alternate; }
+        .carousel-slide:nth-child(5) { animation: kb5 13s ease-in-out infinite alternate; }
+
+        @keyframes kb1 { 0%{transform:scale(1.06) translate( 0,   0)}  100%{transform:scale(1.14) translate(-1.5%, -1%)} }
+        @keyframes kb2 { 0%{transform:scale(1.08) translate( 1%,  0)}  100%{transform:scale(1.15) translate(-1%,  -2%)} }
+        @keyframes kb3 { 0%{transform:scale(1.05) translate(-1%, -1%)} 100%{transform:scale(1.13) translate( 1.5%, 1%)} }
+        @keyframes kb4 { 0%{transform:scale(1.07) translate( 0,  1%)}  100%{transform:scale(1.14) translate(-1%,  -1%)} }
+        @keyframes kb5 { 0%{transform:scale(1.06) translate( 1%, 1%)}  100%{transform:scale(1.13) translate(-1.5%,-0.5%)} }
+
+        /* Dark cinematic grade on top of every slide */
+        .carousel-grade {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            pointer-events: none;
+            /* deep vignette + bottom-fade to dark */
+            background:
+                radial-gradient(ellipse 120% 100% at 50% 40%, transparent 20%, rgba(2,0,10,0.75) 100%),
+                linear-gradient(to bottom,
+                    rgba(2,0,10,0.5)  0%,
+                    rgba(2,0,10,0.1) 40%,
+                    rgba(2,0,10,0.4) 65%,
+                    rgba(2,0,10,1) 100%
+                );
+        }
+        /* subtle purple tint for Rafale brand feel */
+        .carousel-grade::after {
+            content: '';
+            position: fixed; inset: 0;
+            background: radial-gradient(ellipse 80% 50% at 50% 20%, rgba(80,20,180,0.18) 0%, transparent 65%);
+        }
+        /* HUD scanlines over everything */
+        .page-scanlines {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg, transparent, transparent 3px,
+                rgba(80,30,180,0.025) 3px, rgba(80,30,180,0.025) 4px
+            );
+        }
+
+        /* ═══════════════════════════════════════════════
+           CAROUSEL CONTROLS
+        ═══════════════════════════════════════════════ */
+        .carousel-controls {
+            position: fixed;
+            bottom: 3.5rem; left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            padding: 0.6rem 1.5rem;
+            background: rgba(10, 5, 30, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            backdrop-filter: blur(12px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .carousel-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .carousel-dot.active {
+            background: #a78bfa;
+            border-color: #a78bfa;
+            transform: scale(1.3);
+            box-shadow: 0 0 15px rgba(167, 139, 250, 0.8);
+        }
+        .carousel-arrow {
+            background: rgba(10,5,30,0.5);
+            border: 1px solid rgba(200,160,255,0.3);
+            color: rgba(200,160,255,0.8);
+            width: 36px; height: 36px;
+            border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem;
+            transition: all 0.25s ease;
+            backdrop-filter: blur(6px);
+        }
+        .carousel-arrow:hover {
+            background: rgba(140,80,255,0.35);
+            color: #fff; border-color: #a78bfa;
+        }
+        /* slide counter badge */
+        .slide-counter {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.62rem; letter-spacing: 0.15em;
+            color: rgba(200,160,255,0.6);
+            min-width: 48px; text-align: center;
+        }
+
+        /* ═══════════════════════════════════════════════
+           SIDE PREV / NEXT ARROWS
+        ═══════════════════════════════════════════════ */
+        .side-arrow {
+            position: fixed;
+            top: 50%; transform: translateY(-50%);
+            z-index: 10;
+            background: rgba(10,5,30,0.45);
+            border: 1px solid rgba(200,160,255,0.25);
+            color: rgba(200,160,255,0.7);
+            width: 48px; height: 48px;
+            border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+            transition: all 0.25s ease;
+            backdrop-filter: blur(8px);
+        }
+        .side-arrow:hover { background: rgba(120,60,220,0.45); color: #fff; border-color: #a78bfa; }
+        .side-arrow.left  { left:  1.2rem; }
+        .side-arrow.right { right: 1.2rem; }
+
+        /* ═══════════════════════════════════════════════
+           SLIDE CAPTION (bottom-left HUD)
+        ═══════════════════════════════════════════════ */
+        .slide-caption {
+            position: fixed;
+            bottom: 3.5rem; left: 3rem;
+            z-index: 100;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            transition: opacity 0.5s ease;
+            max-width: 300px;
+            pointer-events: none;
+        }
+
+        /* ═══════════════════════════════════════════════
+           PAGE CONTENT (scrolls over carousel)
+        ═══════════════════════════════════════════════ */
+        .page-content {
+            position: relative;
+            z-index: 5;
+            /* transparent above-the-fold so carousel shows through */
+        }
+
+        /* Tall hero spacer — gives the carousel breathing room before content starts */
+        .carousel-hero-spacer {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 7rem 2rem 12rem;
+        }
+
+        /* The rest of the page has a solid dark background so it sits cleanly on scroll */
+        .page-body {
+            background: var(--bg-color);
+            position: relative;
+        }
+
+        /* ═══════════════════════════════════════════════
+           HERO HUD OVERLAY ELEMENTS
+        ═══════════════════════════════════════════════ */
+        .hud-corner-tl, .hud-corner-br {
+            position: absolute;
+            width: 50px; height: 50px;
+            border-color: rgba(160,100,255,0.5);
+            border-style: solid;
+        }
+        .hud-corner-tl {
+            top: 7rem; left: 2rem;
+            border-width: 2px 0 0 2px;
+            border-radius: 4px 0 0 0;
+        }
+        .hud-corner-br {
+            bottom: 10rem; right: 2rem;
+            border-width: 0 2px 2px 0;
+            border-radius: 0 0 4px 0;
+        }
+        .hud-top-right {
+            position: absolute;
+            top: 7.5rem; right: 2rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.6rem; letter-spacing: 0.12em;
+            color: rgba(167,139,250,0.6);
+            text-align: right; line-height: 1.8;
+        }
+
+        /* ═══════════════════════════════════════════════
+           AUTOPLAY PROGRESS BAR
+        ═══════════════════════════════════════════════ */
+        .progress-bar-wrap {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 2px; z-index: 10;
+            background: rgba(255,255,255,0.08);
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #818cf8, #f472b6);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body class="dark-mode">
+
+    <!-- ═══════════════════════════════════════════════
+         FULL-PAGE CAROUSEL (fixed background)
+    ═══════════════════════════════════════════════ -->
+    <div class="carousel-bg" id="carousel-bg">
+        <!--
+            We use the single uploaded rafale_jet.png with different CSS
+            filters/transforms per slide to simulate a multi-image gallery.
+            Swap src= for real additional images when available.
+        -->
+        <div class="carousel-slide active"
+             style="background-image: url('Rafale1.jpeg');"
+             data-caption="RAFALE-B · TWO-SEAT · ASCENT OVER SAVOY"
+             data-caption-i18n="rafaleSlide1"></div>
+
+        <div class="carousel-slide"
+             style="background-image: url('Rafale2.jpeg');"
+             data-caption="RAFALE-C · AIR FORCE · PATROL FORMATION"
+             data-caption-i18n="rafaleSlide2"></div>
+
+        <div class="carousel-slide"
+             style="background-image: url('Rafale3.jpeg');"
+             data-caption="RAFALE-M · MARINE NATIONALE · STRIKE CONFIGURATION"
+             data-caption-i18n="rafaleSlide3"></div>
+
+        <div class="carousel-slide"
+             style="background-image: url('Rafale4.jpeg');"
+             data-caption="RAFALE-M · CARRIER OPS · CATAPULT LAUNCH"
+             data-caption-i18n="rafaleSlide4"></div>
+
+        <div class="carousel-slide"
+             style="background-image: url('Rafale5.jpeg');"
+             data-caption="RAFALE-M · MULTIROLE MISSION · ARMED SORTIE"
+             data-caption-i18n="rafaleSlide5"></div>
+    </div>
+
+    <!-- Cinematic grade overlay (fixed) -->
+    <div class="carousel-grade"></div>
+    <!-- Scanlines -->
+    <div class="page-scanlines"></div>
+
+    <!-- Side prev/next arrows -->
+    <button class="side-arrow left" id="arrow-prev" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+    <button class="side-arrow right" id="arrow-next" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+
+    <!-- Bottom dot controls + counter -->
+    <div class="carousel-controls">
+        <button class="carousel-arrow" id="ctrl-prev"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="carousel-dot active" data-slide="0"></div>
+        <div class="carousel-dot" data-slide="1"></div>
+        <div class="carousel-dot" data-slide="2"></div>
+        <div class="carousel-dot" data-slide="3"></div>
+        <div class="carousel-dot" data-slide="4"></div>
+        <button class="carousel-arrow" id="ctrl-next"><i class="fa-solid fa-chevron-right"></i></button>
+        <div class="slide-counter" id="slide-counter">01 / 05</div>
+    </div>
+
+    <!-- Slide caption (HUD) -->
+    <div class="slide-caption" id="slide-caption">RAFALE-M · MARINE NATIONALE · AFTERBURNER CLIMB</div>
+
+    <!-- Autoplay progress bar -->
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar"></div></div>
+
+    <!-- Nav -->
+    <div id="pill-nav-root"></div>
+
+    <!-- ═══════════════════════════════════════════════
+         PAGE CONTENT
+    ═══════════════════════════════════════════════ -->
+    <div class="page-content">
+
+        <!-- Hero spacer — large type over carousel -->
+        <div class="carousel-hero-spacer">
+            <!-- HUD corners -->
+            <div class="hud-corner-tl"></div>
+            <div class="hud-corner-br"></div>
+            <div class="hud-top-right">
+                ALT: FL500<br>
+                SPD: M 1.8<br>
+                STATUS: ARMED<br>
+                <div style="font-size: 0.5rem; color: rgba(167,139,250,0.4); margin-top: 5px;">CAROUSEL ENGINE LOADED</div>
+            </div>
+
+            <div class="hero-badge" style="margin-bottom:2rem;">
+                <span class="dot" style="background:#a78bfa; box-shadow: 0 0 10px #a78bfa;"></span>
+                <span style="text-transform:uppercase; letter-spacing: 0.25em; font-weight: 600;">Dassault Aviation — Saint-Cloud, France</span>
+            </div>
+            <h1 class="text-gradient" data-i18n="rafaleHeroTitle" style="font-size:clamp(3.5rem,10vw,7rem);line-height:1;margin-bottom:1.2rem;filter:drop-shadow(0 10px 40px rgba(0,0,0,0.9));">
+                Dassault<br>Rafale
+            </h1>
+            <p style="max-width:700px;font-size:1.2rem;opacity:0.9;line-height:1.7;filter:drop-shadow(0 2px 12px rgba(0,0,0,0.9)); font-weight: 300;" data-i18n="rafaleHeroDesc">
+                The omnirole fighter jet symbolizing French aerial supremacy.
+                Equipped with cutting-edge AESA radar and twin M88-4E engines for dominant air-to-air and air-to-ground precision.
+            </p>
+            <div style="margin-top:3rem;font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.3em;color:rgba(167,139,250,0.8);animation:blink 2.5s infinite; cursor:pointer;" onclick="window.scrollTo({top: window.innerHeight, behavior:'smooth'})">
+                ▼ SCROLL TO EXPLORE SYSTEMS
+            </div>
+        </div>
+
+        <!-- Solid dark body starts here -->
+        <div class="page-body">
+            <!-- Back link -->
+            <!-- Sub Nav Label -->
+            <div class="sub-nav" style="padding-top:2rem; justify-content: space-between;">
+                <a href="technology.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> <span data-i18n="backTech">Back to Technology</span></a>
+                <span class="hud-label">RAF-001 // DASSAULT AVIATION</span>
+            </div>
+
+            <!-- Spec Panel -->
+            <div class="spec-panel" style="margin-top:2rem;">
+                <div class="spec-item"><div class="spec-key" data-i18n="specMaxSpeed">Max Speed</div><div class="spec-val">Mach 1.8</div></div>
+                <div class="spec-item"><div class="spec-key" data-i18n="specRadius">Combat Radius</div><div class="spec-val">1,852 km</div></div>
+                <div class="spec-item"><div class="spec-key" data-i18n="specCeiling">Service Ceiling</div><div class="spec-val">50,000 ft</div></div>
+                <div class="spec-item"><div class="spec-key" data-i18n="specThrust">Thrust (each)</div><div class="spec-val">75 kN</div></div>
+                <div class="spec-item"><div class="spec-key" data-i18n="specFlight">First Flight</div><div class="spec-val">1986</div></div>
+                <div class="spec-item"><div class="spec-key" data-i18n="specOperators">Operators</div><div class="spec-val">9 Nations</div></div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-row delay-1">
+                <div class="stat-block"><div class="stat-number" data-counter="220" data-suffix="+">0</div><div class="stat-label" data-i18n="statRafaleDelivered">Aircraft Delivered</div></div>
+                <div class="stat-block"><div class="stat-number" data-counter="1986" data-suffix="">0</div><div class="stat-label" data-i18n="statRafaleFlight">First Flight Year</div></div>
+                <div class="stat-block"><div class="stat-number" data-counter="14" data-suffix="">0</div><div class="stat-label" data-i18n="statRafaleHardpoints">Hardpoints</div></div>
+                <div class="stat-block"><div class="stat-number" data-counter="9500" data-suffix=" kg">0</div><div class="stat-label" data-i18n="statRafalePayload">Payload Capacity</div></div>
+            </div>
+
+            <!-- Spotlight reveal -->
+            <div style="padding:0 2rem 3rem;max-width:1200px;margin:0 auto;width:100%;">
+                <div class="hud-label" style="margin-bottom:1rem;padding-left:0.5rem;border-left:2px solid var(--primary-color);">// TACTICAL SPOTLIGHT — HOVER TO ENGAGE</div>
+                <div id="rafale-container" style="height:600px;width:100%;position:relative;overflow:hidden;background:radial-gradient(ellipse at center,#0d0525 0%,#060010 70%);border-radius:24px;box-shadow:0 20px 60px rgba(120,60,255,0.2);border:1px solid rgba(130,90,255,0.2);">
+                    <div class="hud-scanline"></div>
+                    <div class="hud-corners"></div>
+                    <div class="hud-readout">TGT: RAFALE-M<br>SYS: OPTICAL-TRACK<br>MODE: SPOTLIGHT</div>
+                    <div class="hud-readout-right">ALT: FL500<br>SPD: M1.8<br>STATUS: ARMED</div>
+                    <div id="reveal-info-overlay" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;max-width:500px;background:rgba(6,0,16,0.75);border-radius:18px;border:1px solid rgba(130,90,255,0.4);display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;text-align:center;padding:2.5rem;z-index:6;backdrop-filter:blur(6px);transition:opacity 0.4s ease;">
+                        <div style="font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:#a78bfa;margin-bottom:1rem;" data-i18n="rafaleEngageSpotlight">// ENGAGE SPOTLIGHT MODE</div>
+                        <h2 style="font-size:1.8rem;margin-bottom:0.8rem;color:#c4b5fd;" data-i18n="rafaleSpotlightTitle">Spotlight Reveal</h2>
+                        <p style="font-size:0.95rem;line-height:1.6;opacity:0.85;" data-i18n="rafaleSpotlightDesc">Move your cursor to reveal the Rafale hidden in the dark.</p>
+                        <div style="margin-top:1.5rem;font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.15em;color:#818cf8;animation:blink 1.5s infinite;" data-i18n="rafaleHoverActivate">▶ HOVER TO ACTIVATE</div>
+                    </div>
+                    <img id="reveal-img" src="59869-dassault-rafale-wallpaper.jpg" alt="Dassault Rafale" style="position:absolute;width:100%;height:100%;object-fit:cover;object-position:center;top:0;left:0;z-index:5;opacity:0.25;pointer-events:none;--mx:-9999px;--my:-9999px;-webkit-mask-image:radial-gradient(circle at var(--mx) var(--my),rgba(255,255,255,1) 0px,rgba(255,255,255,0.95) 120px,rgba(255,255,255,0.6) 220px,rgba(255,255,255,0.2) 320px,rgba(255,255,255,0) 400px);mask-image:radial-gradient(circle at var(--mx) var(--my),rgba(255,255,255,1) 0px,rgba(255,255,255,0.95) 120px,rgba(255,255,255,0.6) 220px,rgba(255,255,255,0.2) 320px,rgba(255,255,255,0) 400px);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;transition: opacity 0.3s ease; filter: brightness(1.4);">
+                </div>
+            </div>
+
+            <!-- Info cards -->
+            <div class="details-grid delay-2" style="max-width:1200px;margin:0 auto 4rem;padding:0 2rem;">
+                <section class="card glass-effect">
+                    <div class="card-content">
+                        <div class="card-meta">PROPULSION // SNECMA M88</div>
+                        <h2 data-i18n="rafalePropTitle">Twin-Engine Power</h2>
+                        <p data-i18n="rafalePropDesc">Two SNECMA M88-4E turbofans each producing 75 kN with afterburner give the Rafale an exceptional thrust-to-weight ratio, enabling supersonic performance from sea level to 50,000 ft.</p>
+                    </div>
+                </section>
+                <section class="card glass-effect">
+                    <div class="card-content">
+                        <div class="card-meta">AVIONICS // THALES RBE2</div>
+                        <h2 data-i18n="rafaleAvionicsTitle">Omnirole Mastery</h2>
+                        <p data-i18n="rafaleAvionicsDesc">The Thales RBE2 AESA radar and SPECTRA EW suite enable simultaneous air-to-air, air-to-surface and reconnaissance missions — true omnirole capability unmatched in its class.</p>
+                    </div>
+                </section>
+            </div>
+
+            <footer class="glass-effect delay-3" style="margin-top:0;">
+                <p data-i18n="footerText">© 2026 France Technology Hub. Designed with elegance.</p>
+            </footer>
+        </div><!-- /page-body -->
+    </div><!-- /page-content -->
+
+    <script src="script.js"></script>
+    <script src="pill-nav.js"></script>
+
+    <script>
+    // ─── Carousel Engine ────────────────────────────────────────────────────
+    const slides   = document.querySelectorAll('.carousel-slide');
+    const dots     = document.querySelectorAll('.carousel-dot');
+    const caption  = document.getElementById('slide-caption');
+    const counter  = document.getElementById('slide-counter');
+    const bar      = document.getElementById('progress-bar');
+    const DURATION = 3000; // ms per slide
+    let current    = 0;
+    let autoTimer  = null;
+    let barTimer   = null;
+    let barStart   = null;
+
+    function goTo(idx) {
+        slides[current].classList.remove('active');
+        dots[current].classList.remove('active');
+        current = (idx + slides.length) % slides.length;
+        slides[current].classList.add('active');
+        dots[current].classList.add('active');
+        caption.style.opacity = '0';
+        counter.textContent = String(current + 1).padStart(2,'0') + ' / ' + String(slides.length).padStart(2,'0');
+        setTimeout(() => {
+            const key = slides[current].dataset.captionI18n;
+            if (key && typeof i18n !== 'undefined' && i18n[currentLang] && i18n[currentLang][key]) {
+                caption.textContent = i18n[currentLang][key];
+            } else {
+                caption.textContent = slides[current].dataset.caption || '';
+            }
+            caption.style.opacity = '1';
+        }, 300);
+        resetAutoplay();
+    }
+
+    function startBar() {
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        barStart = performance.now();
+        requestAnimationFrame(tickBar);
+    }
+
+    function tickBar(now) {
+        const elapsed = now - barStart;
+        const pct = Math.min((elapsed / DURATION) * 100, 100);
+        bar.style.width = pct + '%';
+        if (pct < 100) requestAnimationFrame(tickBar);
+    }
+
+    function resetAutoplay() {
+        clearInterval(autoTimer);
+        startBar();
+        autoTimer = setInterval(() => goTo(current + 1), DURATION);
+    }
+
+    // Controls
+    document.getElementById('ctrl-prev').addEventListener('click', () => goTo(current - 1));
+    document.getElementById('ctrl-next').addEventListener('click', () => goTo(current + 1));
+    document.getElementById('arrow-prev').addEventListener('click', () => goTo(current - 1));
+    document.getElementById('arrow-next').addEventListener('click', () => goTo(current + 1));
+    dots.forEach(d => d.addEventListener('click', () => goTo(+d.dataset.slide)));
+
+    // Keyboard
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowLeft')  goTo(current - 1);
+        if (e.key === 'ArrowRight') goTo(current + 1);
+    });
+
+    // Touch swipe
+    let touchX = 0;
+    document.addEventListener('touchstart', e => touchX = e.touches[0].clientX, {passive:true});
+    document.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - touchX;
+        if (Math.abs(dx) > 50) goTo(current + (dx < 0 ? 1 : -1));
+    }, {passive:true});
+
+    // Init
+    caption.textContent = slides[0].dataset.caption || '';
+    resetAutoplay();
+
+    // ─── Visibility on Scroll ───────────────────────────────────────────────
+    window.addEventListener('scroll', () => {
+        const scrolled = window.scrollY;
+        const fadeThreshold = window.innerHeight * 0.7;
+        const opacity = Math.max(0, 1 - (scrolled / fadeThreshold));
+        
+        document.querySelector('.carousel-controls').style.opacity = opacity;
+        document.querySelector('.carousel-controls').style.transform = `translateX(-50%) translateY(${scrolled * 0.1}px)`;
+        document.querySelector('.slide-caption').style.opacity = opacity;
+        document.querySelector('.side-arrow.left').style.opacity = opacity;
+        document.querySelector('.side-arrow.right').style.opacity = opacity;
+        document.querySelector('.progress-bar-wrap').style.opacity = opacity;
+        
+        if (opacity <= 0) {
+            document.querySelector('.carousel-controls').style.pointerEvents = 'none';
+        } else {
+            document.querySelector('.carousel-controls').style.pointerEvents = 'auto';
+        }
+    });
+
+    // ─── Spotlight Reveal ────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        const box     = document.getElementById('rafale-container');
+        const img     = document.getElementById('reveal-img');
+        const overlay = document.getElementById('reveal-info-overlay');
+        let hidden    = false;
+
+        if (box && img) {
+            box.addEventListener('mousemove', e => {
+                const r = box.getBoundingClientRect();
+                img.style.setProperty('--mx', `${e.clientX - r.left}px`);
+                img.style.setProperty('--my', `${e.clientY - r.top}px`);
+                img.style.opacity = '1';
+                if (!hidden) { overlay.style.opacity='0'; overlay.style.pointerEvents='none'; hidden=true; }
+            });
+            box.addEventListener('mouseleave', () => {
+                img.style.setProperty('--mx','-9999px');
+                img.style.setProperty('--my','-9999px');
+                img.style.opacity = '0.18';
+                overlay.style.opacity='1'; overlay.style.pointerEvents='auto'; hidden=false;
+            });
+        }
+    });
+    </script>
+</body>
+</html>

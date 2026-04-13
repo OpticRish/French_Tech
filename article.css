@@ -1,0 +1,108 @@
+/* Article Page Styles — FranceTech */
+.article-hero {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.article-body {
+    max-width: 900px;
+    margin: -4rem auto 6rem;
+    padding: 4rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(30px);
+    border: 1px solid var(--glass-border);
+    border-radius: 40px;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.4);
+}
+
+.article-meta {
+    font-family: var(--mono-font);
+    font-size: 0.75rem;
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 2rem;
+    opacity: 0.8;
+}
+
+.article-content h2 {
+    font-size: 2rem;
+    margin: 3rem 0 1.5rem;
+}
+
+.article-content p {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+    opacity: 0.9;
+}
+
+.article-quote {
+    padding: 2rem;
+    border-left: 4px solid var(--primary-color);
+    background: rgba(167, 139, 250, 0.05);
+    margin: 3rem 0;
+    font-style: italic;
+    font-size: 1.2rem;
+}
+
+.article-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+@media (max-width: 768px) {
+    .article-body { padding: 2rem; margin-top: -2rem; border-radius: 20px; }
+    .article-grid { grid-template-columns: 1fr; }
+    .back-to-history {
+        left: 1rem;
+        top: auto;
+        bottom: 2rem;
+        font-size: 0.7rem;
+    }
+}
+
+.back-to-history {
+    display: inline-flex;
+    width: fit-content;
+    margin: 7rem auto 0 2rem;
+    z-index: 99;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 0.5rem 1rem;
+    border-radius: 40px;
+    text-decoration: none;
+    color: var(--text-color);
+    font-family: var(--mono-font);
+    font-size: 0.7rem;
+    border: 1px solid var(--glass-border);
+    transition: all 0.3s ease;
+    align-items: center;
+    gap: 0.6rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.back-to-history:hover {
+    background: var(--primary-color);
+    color: #fff !important;
+    transform: translateX(10px);
+    border-color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .article-body { padding: 2rem; margin-top: -2rem; border-radius: 20px; }
+    .article-grid { grid-template-columns: 1fr; }
+    .back-to-history {
+        margin: 6rem 0 0 1rem;
+    }
+}
