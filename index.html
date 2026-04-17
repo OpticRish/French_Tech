@@ -113,7 +113,7 @@
         .loader-bg-img {
             position: absolute;
             inset: 0;
-            background-image: url('https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop'); 
+            background-image: url('https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
             filter: brightness(0.2) blur(15px);
@@ -135,7 +135,7 @@
             border-radius: 16px;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
             margin-bottom: 2.5rem;
             transform: translateY(30px);
             opacity: 0;
@@ -160,7 +160,7 @@
         .loader-bar-bg {
             width: 280px;
             height: 3px;
-            background: rgba(255,255,255,0.06);
+            background: rgba(255, 255, 255, 0.06);
             border-radius: 4px;
             overflow: hidden;
             margin-bottom: 1.2rem;
@@ -179,14 +179,18 @@
             font-family: 'Space Mono', monospace;
             font-size: 0.6rem;
             letter-spacing: 0.3em;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255, 255, 255, 0.4);
             text-transform: uppercase;
         }
     </style>
     <style>
-        body { background-color: transparent !important; }
+        body {
+            background-color: transparent !important;
+        }
+
         .hero-grade {
-            position: fixed; /* Make the overlay global too */
+            position: fixed;
+            /* Make the overlay global too */
             z-index: -1;
             background: linear-gradient(to bottom,
                     rgba(3, 0, 18, 0.35) 0%,
@@ -205,7 +209,8 @@
         <div class="loader-bg-img"></div>
         <div class="loader-content">
             <div class="loader-city-view">
-                <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop" alt="Paris view">
+                <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=2073&auto=format&fit=crop"
+                    alt="Paris view">
             </div>
             <div class="loader-percentage">0%</div>
             <div class="loader-bar-bg">
@@ -327,10 +332,16 @@
 
     <footer class="glass-effect observer-item delay-3">
         <p data-i18n="footerText">© 2026 France Technology Hub. Designed with elegance.</p>
-        <div class="contributors" style="margin-top: 1rem; border-top: 1px solid var(--glass-border); padding-top: 1rem;">
-            <p class="hud-label" style="margin-bottom: 0.5rem; font-size: 0.6rem;">Project Contributors</p>
+        <div class="contributors"
+            style="margin-top: 1rem; border-top: 1px solid var(--glass-border); padding-top: 1rem;">
             <p style="font-size: 0.8rem; opacity: 0.7; font-family: var(--mono-font);">
-                Rishabh Raj • Mohak Jain • Ayush Kumar Pandey • Samir Gupta
+                Faculty : A. Manju Rekha
+            </p>
+            <p class="hud-label" style="margin-bottom: 0.5rem; margin-top : 0.5rem; font-size: 0.6rem;">Project
+                Contributors</p>
+            <p style="font-size: 0.8rem; opacity: 0.7; font-family: var(--mono-font);">
+                Rishabh Raj - RA2511033010032 • Mohak Jain - RA2511033010071 • Ayush Kumar Pandey - RA2511033010023 •
+                Samir Gupta - RA2511033010050
             </p>
         </div>
     </footer>
@@ -342,7 +353,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const loader = document.getElementById('loader-screen');
-            
+
             // Check if loader has been shown this session
             if (sessionStorage.getItem('loaderSeen')) {
                 loader.style.display = 'none';
@@ -353,7 +364,7 @@
             const barFill = document.querySelector('.loader-bar-fill');
             const cityView = document.querySelector('.loader-city-view');
             const statusText = document.querySelector('.loader-status');
-            
+
             const statuses = [
                 "Establishing Secure Connection...",
                 "Loading High-Speed Assets...",
@@ -373,13 +384,13 @@
                 const now = performance.now();
                 const elapsed = now - startTime;
                 const timeProgress = Math.min(elapsed / duration, 1);
-                
+
                 // Add some randomness to the visual progress
                 progress = Math.min(timeProgress * 100 + (Math.random() * 2), 100);
-                
+
                 percentText.textContent = Math.floor(progress) + '%';
                 barFill.style.width = progress + '%';
-                
+
                 // Update status text
                 const statusIdx = Math.floor(timeProgress * (statuses.length - 1));
                 statusText.textContent = statuses[statusIdx];
@@ -403,7 +414,7 @@
                 });
 
                 tl.to(".loader-content", { y: -50, opacity: 0, duration: 0.8, ease: "power3.in" })
-                  .to(loader, { opacity: 0, duration: 0.8, ease: "power2.inOut" }, "-=0.4");
+                    .to(loader, { opacity: 0, duration: 0.8, ease: "power2.inOut" }, "-=0.4");
             }
         });
 
