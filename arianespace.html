@@ -74,11 +74,13 @@
             text-transform: uppercase;
             color: var(--primary-color);
             border-bottom: 1px solid var(--glass-border);
+            white-space: nowrap;
         }
         .mission-table td {
             padding: 0.7rem 1rem;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             opacity: 0.8;
+            white-space: nowrap;
         }
         .mission-table tr:hover td { opacity: 1; background: var(--glass-bg); }
         .status-success {
@@ -248,25 +250,27 @@
     <div class="timeline observer-item delay-2">
         <div class="timeline-title" data-i18n="arianeMissionLogTitle">// Notable Ariane Mission Log</div>
         <div style="border: 1px solid var(--glass-border); border-radius:20px; overflow:hidden; background:var(--glass-bg); backdrop-filter:blur(12px);">
-            <table class="mission-table">
-                <thead>
-                    <tr>
-                        <th data-i18n="tableMission">Mission</th>
-                        <th data-i18n="tableVehicle">Vehicle</th>
-                        <th data-i18n="tablePayload">Payload</th>
-                        <th data-i18n="tableDate">Date</th>
-                        <th data-i18n="tableStatus">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>VA-262</td><td>Ariane 5</td><td>James Webb Space Telescope</td><td>Dec 2021</td><td class="status-success">✓ SUCCESS</td></tr>
-                    <tr><td>VV-23</td><td>Vega-C</td><td>LARES-2 + Cubesats</td><td>Jul 2022</td><td class="status-success">✓ SUCCESS</td></tr>
-                    <tr><td>VA-263</td><td>Ariane 5</td><td>SES-22 + MEASAT-3d</td><td>Jul 2022</td><td class="status-success">✓ SUCCESS</td></tr>
-                    <tr><td>FL-01</td><td>Ariane 6</td><td>Maiden Flight Demo</td><td>Jul 2024</td><td class="status-success">✓ SUCCESS</td></tr>
-                    <tr><td>FL-02</td><td>Ariane 6</td><td>Amazon Kuiper Constellation</td><td>2025</td><td class="status-success">✓ SUCCESS</td></tr>
-                    <tr><td>FL-03</td><td>Ariane 6</td><td>Multi-Orbit Commercial</td><td>2026</td><td class="status-upcoming">⟳ PLANNED</td></tr>
-                </tbody>
-            </table>
+            <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                <table class="mission-table">
+                    <thead>
+                        <tr>
+                            <th data-i18n="tableMission">Mission</th>
+                            <th data-i18n="tableVehicle">Vehicle</th>
+                            <th data-i18n="tablePayload">Payload</th>
+                            <th data-i18n="tableDate">Date</th>
+                            <th data-i18n="tableStatus">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>VA-262</td><td>Ariane 5</td><td>James Webb Space Telescope</td><td>Dec 2021</td><td class="status-success">✓ SUCCESS</td></tr>
+                        <tr><td>VV-23</td><td>Vega-C</td><td>LARES-2 + Cubesats</td><td>Jul 2022</td><td class="status-success">✓ SUCCESS</td></tr>
+                        <tr><td>VA-263</td><td>Ariane 5</td><td>SES-22 + MEASAT-3d</td><td>Jul 2022</td><td class="status-success">✓ SUCCESS</td></tr>
+                        <tr><td>FL-01</td><td>Ariane 6</td><td>Maiden Flight Demo</td><td>Jul 2024</td><td class="status-success">✓ SUCCESS</td></tr>
+                        <tr><td>FL-02</td><td>Ariane 6</td><td>Amazon Kuiper Constellation</td><td>2025</td><td class="status-success">✓ SUCCESS</td></tr>
+                        <tr><td>FL-03</td><td>Ariane 6</td><td>Multi-Orbit Commercial</td><td>2026</td><td class="status-upcoming">⟳ PLANNED</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
