@@ -14,7 +14,7 @@ const i18n = {
         trainDesc: "The Train à Grande Vitesse revolutionized rail travel, setting world records and connecting Europe at unprecedented speeds, offering a sustainable alternative to short-haul flights.",
         techTitle: "La French Tech",
         techDesc: "A vibrant startup ecosystem fueling digital innovation, AI infrastructure, and a robust environment for technology entrepreneurs globally, fostering unicorns across various sectors.",
-        footerText: "© 2026 France Technology Hub. Designed with elegance.",
+        footerText: "© 2026 France Technology Hub.<br>Designed with elegance.",
         readMoreAero: "Read Full Story",
         readMoreSpace: "Explore Space",
         metaAero: "Aerospace — Toulouse",
@@ -74,7 +74,7 @@ const i18n = {
         trainDesc: "Le Train à Grande Vitesse a révolutionné les voyages ferroviaires, battant des records du monde et reliant l'Europe à des vitesses sans précédent.",
         techTitle: "La French Tech",
         techDesc: "Un écosystème de startups dynamique stimulant l'innovation numérique, l'infrastructure d'IA et un environnement solide pour les entrepreneurs technologiques.",
-        footerText: "© 2026 Hub Technologique Français. Conçu avec élégance.",
+        footerText: "© 2026 Hub Technologique Français.<br>Conçu avec élégance.",
         readMoreAero: "Lire l'histoire complète",
         readMoreSpace: "Explorer l'Espace",
         metaAero: "Aérospatiale — Toulouse",
@@ -231,7 +231,7 @@ function updateLanguage() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (i18n[currentLang] && i18n[currentLang][key]) {
-            el.textContent = i18n[currentLang][key];
+            el.innerHTML = i18n[currentLang][key];
         }
     });
 }
